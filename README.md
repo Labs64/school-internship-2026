@@ -59,6 +59,25 @@ Set up the NetLicensing MCP server locally using Docker.
 - Setup instructions (Glama): [glama.ai/mcp/servers/Labs64/NetLicensing-MCP](https://glama.ai/mcp/servers/Labs64/NetLicensing-MCP)
 - Docker Hub (Labs64): [hub.docker.com/u/labs64](https://hub.docker.com/u/labs64)
 
+- Connect to Claude Desktop on MacOS by adding this config manually to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+```
+{
+  "mcpServers": {
+    "netlicensing-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "NETLICENSING_API_KEY=...",
+        "ghcr.io/labs64/netlicensing-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
 ---
 
 ### 5. Find 2–3 websites with different pricing table designs
