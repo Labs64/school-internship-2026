@@ -56,7 +56,7 @@ Generate an API key from your account dashboard — this key is required to auth
 Set up the NetLicensing MCP server locally using Docker.
 
 - GitHub repository: [Labs64/NetLicensing-MCP](https://github.com/Labs64/NetLicensing-MCP)
-- Setup instructions (Glama): [glama.ai/mcp/servers/Labs64/NetLicensing-MCP](https://glama.ai/mcp/servers/Labs64/NetLicensing-MCP)
+- Setup instructions: [README.md](https://github.com/Labs64/NetLicensing-MCP/blob/master/README.md#quick-start)
 - Docker Hub (Labs64): [hub.docker.com/u/labs64](https://hub.docker.com/u/labs64)
 
 - Connect to Claude Desktop on MacOS by adding this config manually to `~/Library/Application Support/Claude/claude_desktop_config.json`:
