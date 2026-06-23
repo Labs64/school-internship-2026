@@ -1,6 +1,6 @@
 ```shell
 curl --request POST "https://go.netlicensing.io/core/v2/rest/licensetemplate" \
-  --user "YOUR_USERNAME:YOUR_PASSWORD" \
+  --user "apiKey:..." \
   --header "Accept: application/json" \
   --header "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "productModuleNumber=..." \
