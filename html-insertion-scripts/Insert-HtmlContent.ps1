@@ -3,25 +3,22 @@
   Windows counterpart of insert-html-content.sh.
 
 .DESCRIPTION
-  Finds a placeholder comment <!-- INSERT:<marker> --> in an HTML file and
-  replaces it with the contents of another file, wrapped in:
+  Finds the marker pair
 
-    <!-- BEGIN:<marker> -->
-    ...content...
-    <!-- END:<marker> -->
+    <!-- BEGIN:PricingTable -->
+    <!-- END:PricingTable -->
 
-  If the BEGIN/END markers already exist in the target file (inserted by a
-  previous run), the content between them is replaced with the new content
-  instead, so the script can be re-run to update previously inserted content.
+  in an HTML file and inserts the contents of another file between them. If
+  content is already present between the markers (from a previous run), it
+  is replaced with the new content, so the script can be re-run to update
+  previously inserted content.
 
 .PARAMETER Target
-  HTML file to modify (required).
+  HTML file to modify (required). Must already contain the
+  <!-- BEGIN:PricingTable --> / <!-- END:PricingTable --> marker pair.
 
 .PARAMETER Source
   File whose contents will be inserted (required).
-
-.PARAMETER Marker
-  Marker name (default: CONTENT).
 
 .PARAMETER Output
   Write result to this file instead of editing -Target in place.
@@ -30,14 +27,13 @@
   Do not create a .bak backup when editing in place.
 
 .EXAMPLE
-  .\Insert-HtmlContent.ps1 -Target page.html -Source pricing-table.html -Marker PRICING_TABLE
+  .\Insert-HtmlContent.ps1 -Target page.html -Source pricing-table.html
 #>
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)] [string]$Target,
     [Parameter(Mandatory = $true)] [string]$Source,
-    [string]$Marker = "CONTENT",
     [string]$Output,
     [switch]$NoBackup
 )
@@ -53,9 +49,8 @@ if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) {
     exit 1
 }
 
-$insertLine = "<!-- INSERT:$Marker -->"
-$beginLine  = "<!-- BEGIN:$Marker -->"
-$endLine    = "<!-- END:$Marker -->"
+$beginLine = "<!-- BEGIN:PricingTable -->"
+$endLine   = "<!-- END:PricingTable -->"
 
 $targetLines = Get-Content -LiteralPath $Target
 $sourceLines = Get-Content -LiteralPath $Source
@@ -66,14 +61,6 @@ $inBlock = $false
 
 foreach ($line in $targetLines) {
     $trimmed = $line.Trim()
-
-    if (-not $found -and $trimmed -eq $insertLine) {
-        $result.Add($beginLine)
-        foreach ($l in $sourceLines) { $result.Add($l) }
-        $result.Add($endLine)
-        $found = $true
-        continue
-    }
 
     if (-not $found -and $trimmed -eq $beginLine) {
         $result.Add($beginLine)
@@ -95,7 +82,7 @@ foreach ($line in $targetLines) {
 }
 
 if (-not $found) {
-    Write-Error "No placeholder '$insertLine' or marker block '$beginLine' .. '$endLine' found in $Target"
+    Write-Error "Marker pair '$beginLine' .. '$endLine' not found in $Target"
     exit 1
 }
 
