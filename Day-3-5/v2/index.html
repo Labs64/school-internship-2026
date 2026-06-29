@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetLicensing — Pricing &amp; Plans</title>
+<style>
+  :root{
+    --ink:#0b0c0f;
+    --muted:#6b7280;
+    --faint:#9ca3af;
+    --line:#e5e7eb;
+    --bg:#ffffff;
+    --panel:#f9fafb;
+    --accent:#10b981;
+    --accent-dark:#065f46;
+    --radius:12px;
+    font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--ink);}
+
+  .green-glow{
+    position:fixed;top:0;left:0;right:0;height:600px;
+    background:linear-gradient(180deg,rgba(16,185,129,0.12) 0%,rgba(16,185,129,0.04) 50%,transparent 100%);
+    pointer-events:none;z-index:0;
+  }
+
+  nav{
+    position:relative;z-index:10;
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1rem;color:var(--ink);text-decoration:none;}
+  .brand svg{width:24px;height:24px;}
+  .nav-links{display:flex;align-items:center;gap:2px;list-style:none;}
+  .nav-links a{
+    color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;
+    padding:8px 14px;border-radius:8px;transition:background .15s,color .15s;
+  }
+  .nav-links a:hover{background:rgba(0,0,0,.04);color:var(--ink);}
+  .nav-links a.active{color:var(--ink);font-weight:600;}
+  .nav-cta{background:var(--ink)!important;color:#fff!important;font-weight:600!important;}
+  .nav-cta:hover{background:#1f2937!important;}
+
+  body{padding:0 0 80px;position:relative;}
+
+  .page-head{
+    max-width:900px;margin:0 auto;padding:72px 24px 8px;text-align:center;
+    position:relative;z-index:1;
+  }
+  .page-head h1{
+    font-size:clamp(28px,4.4vw,40px);margin:0 0 10px;letter-spacing:-0.015em;font-weight:700;
+  }
+  .page-head p{color:var(--muted);font-size:16px;margin:0 0 48px;}
+
+  .plan-cards{
+    max-width:900px;margin:0 auto 72px;padding:0 24px;
+    display:grid;grid-template-columns:repeat(2,1fr);gap:20px;
+    position:relative;z-index:1;
+  }
+  .plan-card{
+    background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);
+    padding:28px 24px;display:flex;flex-direction:column;gap:14px;
+  }
+  .plan-card.featured{border-color:#10b981;box-shadow:0 0 0 1px #10b981;}
+  .plan-badge{
+    display:inline-block;background:#10b981;color:#fff;font-size:11px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;
+    width:fit-content;
+  }
+  .plan-card h3{margin:0;font-size:1.1rem;font-weight:700;}
+  .plan-price{display:flex;align-items:baseline;gap:4px;}
+  .plan-price .amount{font-size:2rem;font-weight:700;}
+  .plan-price .period{font-size:.9rem;color:var(--muted);}
+  .plan-card .tagline{font-size:.88rem;color:var(--muted);margin:0;line-height:1.5;}
+  .plan-btn{
+    margin-top:auto;width:100%;padding:10px 0;text-align:center;border-radius:8px;
+    font-size:.9rem;font-weight:600;text-decoration:none;border:1px solid var(--line);
+    color:var(--ink);background:var(--bg);cursor:pointer;
+  }
+  .plan-btn:hover{background:var(--panel);}
+  .plan-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .plan-btn.primary:hover{background:#059669;}
+
+  .compare-section{
+    max-width:900px;margin:0 auto 72px;padding:0 24px;
+    position:relative;z-index:1;
+  }
+  .compare-section h2{text-align:center;font-size:1.5rem;font-weight:700;margin:0 0 8px;}
+  .compare-section .sub{text-align:center;color:var(--muted);font-size:.95rem;margin:0 0 32px;}
+
+  .nlic-pricing-table{
+    display:grid;grid-template-columns:220px repeat(2,1fr);
+    background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;font-family:inherit;color:var(--ink);
+  }
+  .nlic-column{border-right:1px solid var(--line);}
+  .nlic-column:last-of-type{border-right:none;}
+
+  .nlic-column-skus{background:var(--panel);}
+  .nlic-column-skus .nlic-column-head{min-height:120px;border-bottom:1px solid var(--line);}
+  .nlic-column-skus .nlic-plan-name,
+  .nlic-column-skus .nlic-plan-description,
+  .nlic-column-skus .nlic-plan-price{display:none;}
+
+  .nlic-column-skus .nlic-sku-list{margin:0;padding:0;list-style:none;}
+  .nlic-column-skus .nlic-sku-item{
+    padding:0 16px;font-size:.78rem;color:var(--muted);
+    border-bottom:1px solid #f0f0f0;height:40px;
+    display:flex;align-items:center;box-sizing:border-box;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .nlic-column-skus .nlic-sku-item:last-child{border-bottom:none;}
+
+  .nlic-plan-column{height:100%;display:flex;flex-direction:column;}
+  .nlic-column-head{
+    padding:20px 16px 16px;border-bottom:1px solid var(--line);
+    text-align:center;min-height:120px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+  .nlic-column-LT-PRICE-BASIC .nlic-column-head,
+  .nlic-column-LT-PRICE-PREMIUM .nlic-column-head{border-left:1px solid #f0f0f0;}
+
+  .nlic-plan-name{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:4px;text-align:center;}
+  .nlic-plan-description{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:8px;}
+  .nlic-plan-price{display:flex;justify-content:center;align-items:baseline;gap:4px;text-align:center;}
+
+  .nlic-plan-column .nlic-sku-list{margin:0;padding:0;list-style:none;}
+  .nlic-plan-column .nlic-sku-feature,
+  .nlic-plan-column .nlic-sku-quota{
+    height:40px;display:flex;align-items:center;justify-content:center;text-align:center;
+    border-bottom:1px solid #f0f0f0;border-left:1px solid #f0f0f0;position:relative;
+    box-sizing:border-box;margin:0;padding:0;
+  }
+  .nlic-plan-column .nlic-sku-description{display:none;}
+
+  .nlic-sku-feature-item{
+    width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:700;
+  }
+  .nlic-sku-feature-enabled .nlic-sku-feature-item::after{content:"✓";color:var(--accent);}
+  .nlic-sku-feature-disabled .nlic-sku-feature-item::after{content:"–";color:var(--line);}
+
+  .nlic-sku-quota-item{font-size:.78rem;font-weight:600;color:var(--ink);text-align:center;}
+  .nlic-sku-quota-item[data-value="0"]{color:var(--faint);font-weight:400;}
+  .nlic-column-LT-PRICE-PREMIUM .nlic-sku-quota-item[data-value="-1"]{font-size:0;}
+  .nlic-column-LT-PRICE-PREMIUM .nlic-sku-quota-item[data-value="-1"]::after{
+    content:"Unlimited";font-size:.78rem;font-weight:600;color:var(--accent);
+  }
+
+  .nlic-action{display:none;}
+  .nlic-attribution{
+    text-align:center;font-size:.72rem;color:var(--faint);
+    padding:14px 0 4px;width:100%;grid-column:1/-1;
+  }
+  .nlic-attribution a{color:var(--faint);text-decoration:underline;}
+
+  .faq-section{max-width:700px;margin:0 auto 80px;padding:0 24px;position:relative;z-index:1;}
+  .faq-section h2{text-align:center;font-size:1.5rem;font-weight:700;margin:0 0 32px;}
+  .faq-group-title{
+    font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);margin:28px 0 12px;
+  }
+  .faq-item{border-bottom:1px solid var(--line);padding:16px 0;}
+  .faq-item summary{
+    cursor:pointer;font-size:.92rem;font-weight:600;color:var(--ink);
+    list-style:none;display:flex;justify-content:space-between;align-items:center;
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{
+    content:"+";color:var(--faint);font-size:1.1rem;font-weight:400;
+    margin-left:16px;transition:transform .2s;
+  }
+  .faq-item[open] summary::after{transform:rotate(45deg);}
+  .faq-item p{margin:12px 0 0;font-size:.88rem;color:var(--muted);line-height:1.6;}
+
+  footer{text-align:center;padding:24px;font-size:.8rem;color:var(--faint);position:relative;z-index:1;}
+
+  @media(max-width:768px){
+    .plan-cards{grid-template-columns:1fr;}
+    .nlic-pricing-table{grid-template-columns:1fr;}
+    .nlic-column-skus{display:none;}
+    .nlic-plan-column .nlic-sku-description{display:block;font-size:.82rem;color:var(--muted);margin-bottom:4px;}
+    .nlic-plan-column .nlic-sku-feature,.nlic-plan-column .nlic-sku-quota{
+      flex-direction:column;align-items:flex-start;min-height:auto;padding:10px 20px;
+    }
+    .nlic-column-head{min-height:auto;}
+    .nav-links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="green-glow"></div>
+
+<nav>
+  <a href="#" class="brand">
+    <img src="https://netlicensing.io/img/labs64-avatar-30x30.png" alt="NetLicensing" style="width:24px;height:24px;border-radius:5px;">
+    NetLicensing
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Sign in</a></li>
+    <li><a href="#">Install</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#" class="active">Pricing</a></li>
+    <li><a href="#">Enterprise</a></li>
+    <li><a href="#">More</a></li>
+    <li><a href="#" class="nav-cta">Get started</a></li>
+  </ul>
+</nav>
+
+<div class="page-head">
+  <h1>Pricing &amp; Plans</h1>
+  <p>Simple, transparent pricing for individuals and teams.</p>
+</div>
+
+<section class="plan-cards">
+  <div class="plan-card">
+    <h3>Basic</h3>
+    <div class="plan-price"><span class="amount">€80</span><span class="period">/ month</span></div>
+    <p class="tagline">For startups and growing businesses.</p>
+    <a href="#" class="plan-btn">Get started</a>
+  </div>
+  <div class="plan-card featured">
+    <span class="plan-badge">Most popular</span>
+    <h3>Premium</h3>
+    <div class="plan-price"><span class="amount">€280</span><span class="period">/ month</span></div>
+    <p class="tagline">Full featured for comprehensive products.</p>
+    <a href="#" class="plan-btn primary">Start free trial</a>
+  </div>
+</section>
+
+<section class="compare-section">
+  <h2>Compare plans in detail</h2>
+  <p class="sub">Every feature, quota, and limit, side by side.</p>
+
+<!--Generated by NetLicensing.IO - Innovative License Management Solution on 2026-06-24 17:05:24-->
+<div class="nlic-pricing-table"
+     data-plan-count="2"
+     data-layout="table">
+
+            <div class="nlic-column nlic-column-skus">
+                <div>
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name"></div>
+                        <div class="nlic-plan-description"></div>
+                        <div class="nlic-plan-price" data-price="" data-currency="" data-period=""></div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-item nlic-sku-AGENT">NetLicensing Agent</li>
+                                <li class="nlic-sku-item nlic-sku-ANALYTICS_BASIC">Product Usage Tracking Basic</li>
+                                <li class="nlic-sku-item nlic-sku-ANALYTICS_FULL">Product Usage Tracking</li>
+                                <li class="nlic-sku-item nlic-sku-APIREQUESTS">API Requests</li>
+                                <li class="nlic-sku-item nlic-sku-ATTRIBUTION">Attribution required</li>
+                                <li class="nlic-sku-item nlic-sku-CONSOLE">Management Console</li>
+                                <li class="nlic-sku-item nlic-sku-EUVAT">EU VAT Support</li>
+                                <li class="nlic-sku-item nlic-sku-LICENSEES">Licensees</li>
+                                <li class="nlic-sku-item nlic-sku-LICENSEESECRET">Licensee Secret (Node-Locked)</li>
+                                <li class="nlic-sku-item nlic-sku-LICENSES">Licenses</li>
+                                <li class="nlic-sku-item nlic-sku-LM_FLOATING">Floating</li>
+                                <li class="nlic-sku-item nlic-sku-LM_MULTIFEATURE">MultiFeature</li>
+                                <li class="nlic-sku-item nlic-sku-LM_NODELOCKED">NodeLocked</li>
+                                <li class="nlic-sku-item nlic-sku-LM_PAYPERUSE">PayPerUse</li>
+                                <li class="nlic-sku-item nlic-sku-LM_PRICINGTABLE">PricingTable</li>
+                                <li class="nlic-sku-item nlic-sku-LM_QUOTA">Quota</li>
+                                <li class="nlic-sku-item nlic-sku-LM_RENTAL">Rental</li>
+                                <li class="nlic-sku-item nlic-sku-LM_SUBSCRIPTION">Subscription</li>
+                                <li class="nlic-sku-item nlic-sku-LM_TRYANDBUY">TryAndBuy</li>
+                                <li class="nlic-sku-item nlic-sku-MAINTENANCE">Maintenance/Updates</li>
+                                <li class="nlic-sku-item nlic-sku-PRODUCTMODULES">Product Modules (per product)</li>
+                                <li class="nlic-sku-item nlic-sku-PRODUCTS">Active products</li>
+                                <li class="nlic-sku-item nlic-sku-PSP_PAYPAL">PAYPAL Payment Services</li>
+                                <li class="nlic-sku-item nlic-sku-PSP_STRIPE">STRIPE Payment Services</li>
+                                <li class="nlic-sku-item nlic-sku-RESTFULAPI">RESTful API and Integration</li>
+                                <li class="nlic-sku-item nlic-sku-SHOP">NetLicensing Shop</li>
+                                <li class="nlic-sku-item nlic-sku-SHOPCUST">Shop Customization</li>
+                                <li class="nlic-sku-item nlic-sku-SLA">Service Level Agreement</li>
+                                <li class="nlic-sku-item nlic-sku-SUPP_PRIORITY">Priority Technical Support</li>
+                                <li class="nlic-sku-item nlic-sku-SUPP_STANDARD">Standard Technical Support</li>
+                                <li class="nlic-sku-item nlic-sku-TECHMANAGER">Dedicated Technical Success Manager</li>
+                                <li class="nlic-sku-item nlic-sku-TRAINING">Online Licensing Training</li>
+                                <li class="nlic-sku-item nlic-sku-CUSTOMERPORTAL">Customer Portal</li>
+                                <li class="nlic-sku-item nlic-sku-NOTIFICATIONS">Notifications</li>
+                                <li class="nlic-sku-item nlic-sku-LM_DISCOUNT">Discount</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT-PRICE-BASIC"
+                 data-plan="LT-PRICE-BASIC"
+                 data-plan-name="Basic">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">Basic</div>
+                        <div class="nlic-plan-description">For startups and growing businesses</div>
+                        <div class="nlic-plan-price" data-price="80" data-currency="EUR" data-period="month">
+                                <span class="nlic-plan-price-amount">80</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-feature nlic-sku-AGENT nlic-sku-feature-disabled"><div class="nlic-sku-description">NetLicensing Agent</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-ANALYTICS_BASIC nlic-sku-feature-disabled"><div class="nlic-sku-description">Product Usage Tracking Basic</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-ANALYTICS_FULL nlic-sku-feature-disabled"><div class="nlic-sku-description">Product Usage Tracking</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-APIREQUESTS"><div class="nlic-sku-description">API Requests</div><div class="nlic-sku-quota-item" data-value="10">10</div></li>
+                                <li class="nlic-sku-feature nlic-sku-ATTRIBUTION nlic-sku-feature-disabled"><div class="nlic-sku-description">Attribution required</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-CONSOLE nlic-sku-feature-enabled"><div class="nlic-sku-description">Management Console</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-EUVAT nlic-sku-feature-enabled"><div class="nlic-sku-description">EU VAT Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-LICENSEES"><div class="nlic-sku-description">Licensees</div><div class="nlic-sku-quota-item" data-value="100">100</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LICENSEESECRET nlic-sku-feature-disabled"><div class="nlic-sku-description">Licensee Secret (Node-Locked)</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-LICENSES"><div class="nlic-sku-description">Licenses</div><div class="nlic-sku-quota-item" data-value="-1">-1</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_FLOATING nlic-sku-feature-disabled"><div class="nlic-sku-description">Floating</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_MULTIFEATURE nlic-sku-feature-enabled"><div class="nlic-sku-description">MultiFeature</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_NODELOCKED nlic-sku-feature-disabled"><div class="nlic-sku-description">NodeLocked</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_PAYPERUSE nlic-sku-feature-disabled"><div class="nlic-sku-description">PayPerUse</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_PRICINGTABLE nlic-sku-feature-disabled"><div class="nlic-sku-description">PricingTable</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_QUOTA nlic-sku-feature-disabled"><div class="nlic-sku-description">Quota</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_RENTAL nlic-sku-feature-disabled"><div class="nlic-sku-description">Rental</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_SUBSCRIPTION nlic-sku-feature-enabled"><div class="nlic-sku-description">Subscription</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_TRYANDBUY nlic-sku-feature-enabled"><div class="nlic-sku-description">TryAndBuy</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-MAINTENANCE nlic-sku-feature-enabled"><div class="nlic-sku-description">Maintenance/Updates</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-PRODUCTMODULES"><div class="nlic-sku-description">Product Modules (per product)</div><div class="nlic-sku-quota-item" data-value="5">5</div></li>
+                                <li class="nlic-sku-quota nlic-sku-PRODUCTS"><div class="nlic-sku-description">Active products</div><div class="nlic-sku-quota-item" data-value="3">3</div></li>
+                                <li class="nlic-sku-feature nlic-sku-PSP_PAYPAL nlic-sku-feature-enabled"><div class="nlic-sku-description">PAYPAL Payment Services</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-PSP_STRIPE nlic-sku-feature-enabled"><div class="nlic-sku-description">STRIPE Payment Services</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-RESTFULAPI nlic-sku-feature-enabled"><div class="nlic-sku-description">RESTful API and Integration</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SHOP nlic-sku-feature-enabled"><div class="nlic-sku-description">NetLicensing Shop</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SHOPCUST nlic-sku-feature-disabled"><div class="nlic-sku-description">Shop Customization</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SLA nlic-sku-feature-disabled"><div class="nlic-sku-description">Service Level Agreement</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_PRIORITY nlic-sku-feature-disabled"><div class="nlic-sku-description">Priority Technical Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_STANDARD nlic-sku-feature-enabled"><div class="nlic-sku-description">Standard Technical Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-TECHMANAGER nlic-sku-feature-disabled"><div class="nlic-sku-description">Dedicated Technical Success Manager</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-TRAINING"><div class="nlic-sku-description">Online Licensing Training</div><div class="nlic-sku-quota-item" data-value="0">0</div></li>
+                                <li class="nlic-sku-feature nlic-sku-CUSTOMERPORTAL nlic-sku-feature-disabled"><div class="nlic-sku-description">Customer Portal</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-NOTIFICATIONS"><div class="nlic-sku-description">Notifications</div><div class="nlic-sku-quota-item" data-value="2">2</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_DISCOUNT nlic-sku-feature-disabled"><div class="nlic-sku-description">Discount</div><div class="nlic-sku-feature-item"></div></li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT-PRICE-BASIC nlic-action-disabled"><a href="" class="nlic-action-url nlic-action-url-disabled" aria-disabled="true"></a></div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT-PRICE-PREMIUM"
+                 data-plan="LT-PRICE-PREMIUM"
+                 data-plan-name="Premium">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">Premium</div>
+                        <div class="nlic-plan-description">Full featured for comprehensive products</div>
+                        <div class="nlic-plan-price" data-price="280" data-currency="EUR" data-period="month">
+                                <span class="nlic-plan-price-amount">280</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-feature nlic-sku-AGENT nlic-sku-feature-disabled"><div class="nlic-sku-description">NetLicensing Agent</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-ANALYTICS_BASIC nlic-sku-feature-enabled"><div class="nlic-sku-description">Product Usage Tracking Basic</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-ANALYTICS_FULL nlic-sku-feature-disabled"><div class="nlic-sku-description">Product Usage Tracking</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-APIREQUESTS"><div class="nlic-sku-description">API Requests</div><div class="nlic-sku-quota-item" data-value="50">50</div></li>
+                                <li class="nlic-sku-feature nlic-sku-ATTRIBUTION nlic-sku-feature-disabled"><div class="nlic-sku-description">Attribution required</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-CONSOLE nlic-sku-feature-enabled"><div class="nlic-sku-description">Management Console</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-EUVAT nlic-sku-feature-enabled"><div class="nlic-sku-description">EU VAT Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-LICENSEES"><div class="nlic-sku-description">Licensees</div><div class="nlic-sku-quota-item" data-value="500">500</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LICENSEESECRET nlic-sku-feature-disabled"><div class="nlic-sku-description">Licensee Secret (Node-Locked)</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-LICENSES"><div class="nlic-sku-description">Licenses</div><div class="nlic-sku-quota-item" data-value="-1">-1</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_FLOATING nlic-sku-feature-enabled"><div class="nlic-sku-description">Floating</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_MULTIFEATURE nlic-sku-feature-enabled"><div class="nlic-sku-description">MultiFeature</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_NODELOCKED nlic-sku-feature-enabled"><div class="nlic-sku-description">NodeLocked</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_PAYPERUSE nlic-sku-feature-disabled"><div class="nlic-sku-description">PayPerUse</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_PRICINGTABLE nlic-sku-feature-disabled"><div class="nlic-sku-description">PricingTable</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_QUOTA nlic-sku-feature-disabled"><div class="nlic-sku-description">Quota</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_RENTAL nlic-sku-feature-disabled"><div class="nlic-sku-description">Rental</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_SUBSCRIPTION nlic-sku-feature-enabled"><div class="nlic-sku-description">Subscription</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_TRYANDBUY nlic-sku-feature-enabled"><div class="nlic-sku-description">TryAndBuy</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-MAINTENANCE nlic-sku-feature-enabled"><div class="nlic-sku-description">Maintenance/Updates</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-PRODUCTMODULES"><div class="nlic-sku-description">Product Modules (per product)</div><div class="nlic-sku-quota-item" data-value="10">10</div></li>
+                                <li class="nlic-sku-quota nlic-sku-PRODUCTS"><div class="nlic-sku-description">Active products</div><div class="nlic-sku-quota-item" data-value="10">10</div></li>
+                                <li class="nlic-sku-feature nlic-sku-PSP_PAYPAL nlic-sku-feature-enabled"><div class="nlic-sku-description">PAYPAL Payment Services</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-PSP_STRIPE nlic-sku-feature-enabled"><div class="nlic-sku-description">STRIPE Payment Services</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-RESTFULAPI nlic-sku-feature-enabled"><div class="nlic-sku-description">RESTful API and Integration</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SHOP nlic-sku-feature-enabled"><div class="nlic-sku-description">NetLicensing Shop</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SHOPCUST nlic-sku-feature-enabled"><div class="nlic-sku-description">Shop Customization</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SLA nlic-sku-feature-disabled"><div class="nlic-sku-description">Service Level Agreement</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_PRIORITY nlic-sku-feature-disabled"><div class="nlic-sku-description">Priority Technical Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_STANDARD nlic-sku-feature-enabled"><div class="nlic-sku-description">Standard Technical Support</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-feature nlic-sku-TECHMANAGER nlic-sku-feature-disabled"><div class="nlic-sku-description">Dedicated Technical Success Manager</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-TRAINING"><div class="nlic-sku-description">Online Licensing Training</div><div class="nlic-sku-quota-item" data-value="1">1</div></li>
+                                <li class="nlic-sku-feature nlic-sku-CUSTOMERPORTAL nlic-sku-feature-enabled"><div class="nlic-sku-description">Customer Portal</div><div class="nlic-sku-feature-item"></div></li>
+                                <li class="nlic-sku-quota nlic-sku-NOTIFICATIONS"><div class="nlic-sku-description">Notifications</div><div class="nlic-sku-quota-item" data-value="5">5</div></li>
+                                <li class="nlic-sku-feature nlic-sku-LM_DISCOUNT nlic-sku-feature-disabled"><div class="nlic-sku-description">Discount</div><div class="nlic-sku-feature-item"></div></li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT-PRICE-PREMIUM nlic-action-disabled"><a href="" class="nlic-action-url nlic-action-url-disabled" aria-disabled="true"></a></div>
+                </div>
+            </div>
+        <div class="nlic-attribution">
+            Powered by <a href="https://netlicensing.io" rel="nofollow">Labs64 NetLicensing</a>
+        </div>
+</div>
+
+</section>
+
+<section class="faq-section">
+  <h2>Frequently Asked Questions</h2>
+
+  <div class="faq-group-title">Plans &amp; Pricing</div>
+  <details class="faq-item" open>
+    <summary>What's included in the Basic plan?</summary>
+    <p>The Basic plan includes Management Console, EU VAT Support, MultiFeature, Subscription, TryAndBuy, Maintenance, PayPal/Stripe payments, RESTful API, and NetLicensing Shop.</p>
+  </details>
+  <details class="faq-item">
+    <summary>What's the difference between Basic and Premium?</summary>
+    <p>Premium includes everything in Basic plus Product Usage Tracking, Floating and NodeLocked licensing models, Shop Customization, Customer Portal, more Licensees (500 vs 100), more Products (10 vs 3), more API Requests (50 vs 10), and Online Licensing Training.</p>
+  </details>
+  <details class="faq-item">
+    <summary>Can I upgrade from Basic to Premium?</summary>
+    <p>Yes. You can upgrade at any time. The price difference will be prorated for the remainder of your billing period.</p>
+  </details>
+
+  <div class="faq-group-title">Licensing Models</div>
+  <details class="faq-item">
+    <summary>Which licensing models are included?</summary>
+    <p>Basic includes MultiFeature, Subscription, and TryAndBuy. Premium adds Floating and NodeLocked on top of those.</p>
+  </details>
+  <details class="faq-item">
+    <summary>What is PayPerUse, Quota, Rental, PricingTable, and Discount?</summary>
+    <p>These licensing models are available as add-ons. Contact sales for pricing and availability.</p>
+  </details>
+
+  <div class="faq-group-title">Support</div>
+  <details class="faq-item">
+    <summary>What support is included?</summary>
+    <p>Both plans include Standard Technical Support. Priority Technical Support and a Dedicated Technical Success Manager are available as add-ons.</p>
+  </details>
+</section>
+
+<footer>© 2026 NetLicensing. All rights reserved.</footer>
+
+</body>
+</html>
