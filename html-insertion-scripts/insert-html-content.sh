@@ -2,15 +2,16 @@
 #
 # Linux/macOS counterpart of Insert-HtmlContent.ps1.
 #
-# Finds the marker pair
+# Finds every occurrence of the marker pair
 #
 #   <!-- BEGIN:PricingTable -->
 #   <!-- END:PricingTable -->
 #
 # in an HTML file and inserts the contents of another file between them. If
-# content is already present between the markers (from a previous run), it
-# is replaced with the new content, so the script can be re-run to update
-# previously inserted content.
+# content is already present between a pair of markers (from a previous
+# run), it is replaced with the new content, so the script can be re-run to
+# update previously inserted content. A file may contain multiple marker
+# pairs; all of them are updated with the same content.
 
 set -euo pipefail
 
@@ -18,9 +19,10 @@ usage() {
   cat <<'EOF'
 Usage: insert-html-content.sh -t <target.html> -s <source-file> [-o <output.html>] [--no-backup]
 
-The target file must already contain the placeholder marker pair:
+The target file must already contain one or more placeholder marker pairs:
   <!-- BEGIN:PricingTable -->
   <!-- END:PricingTable -->
+All occurrences are updated with the same content.
 
 Options:
   -t, --target <file>   HTML file to modify (required)
@@ -84,7 +86,7 @@ if ! awk -v begin_line="$begin_line" -v end_line="$end_line" -v content_file="$s
     trimmed = $0
     gsub(/^[ \t]+|[ \t]+$/, "", trimmed)
 
-    if (!found && trimmed == begin_line) {
+    if (!in_block && trimmed == begin_line) {
       print begin_line
       for (i = 0; i < n; i++) print content[i]
       found = 1

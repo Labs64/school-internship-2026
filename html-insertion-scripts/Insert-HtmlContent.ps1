@@ -3,19 +3,20 @@
   Windows counterpart of insert-html-content.sh.
 
 .DESCRIPTION
-  Finds the marker pair
+  Finds every occurrence of the marker pair
 
     <!-- BEGIN:PricingTable -->
     <!-- END:PricingTable -->
 
   in an HTML file and inserts the contents of another file between them. If
-  content is already present between the markers (from a previous run), it
-  is replaced with the new content, so the script can be re-run to update
-  previously inserted content.
+  content is already present between a pair of markers (from a previous
+  run), it is replaced with the new content, so the script can be re-run to
+  update previously inserted content. A file may contain multiple marker
+  pairs; all of them are updated with the same content.
 
 .PARAMETER Target
-  HTML file to modify (required). Must already contain the
-  <!-- BEGIN:PricingTable --> / <!-- END:PricingTable --> marker pair.
+  HTML file to modify (required). Must already contain one or more
+  <!-- BEGIN:PricingTable --> / <!-- END:PricingTable --> marker pairs.
 
 .PARAMETER Source
   File whose contents will be inserted (required).
@@ -62,7 +63,7 @@ $inBlock = $false
 foreach ($line in $targetLines) {
     $trimmed = $line.Trim()
 
-    if (-not $found -and $trimmed -eq $beginLine) {
+    if (-not $inBlock -and $trimmed -eq $beginLine) {
         $result.Add($beginLine)
         foreach ($l in $sourceLines) { $result.Add($l) }
         $found = $true
