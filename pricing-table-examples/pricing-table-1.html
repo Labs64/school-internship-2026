@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Table Template</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card-bg: #ffffff;
+    --text-main: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    padding: 60px 20px;
+  }
+
+  .pricing-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 48px;
+  }
+
+  .pricing-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .pricing-header p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .plan {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .plan:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  }
+
+  .plan.featured {
+    border: 2px solid var(--accent);
+    position: relative;
+  }
+
+  .badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  .plan-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .plan-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  .plan-price {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .plan-price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .plan-billing {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+
+  .plan-features {
+    list-style: none;
+    margin-bottom: 28px;
+    flex-grow: 1;
+  }
+
+  .plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.92rem;
+    color: var(--text-main);
+  }
+
+  .plan-features li::before {
+    content: "✓";
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .plan-cta:hover {
+    background: var(--accent-light);
+  }
+
+  .plan.featured .plan-cta {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+  }
+
+  .plan.featured .plan-cta:hover {
+    background: #4338ca;
+  }
+
+  @media (max-width: 860px) {
+    .pricing-grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="pricing-header">
+    <h1>Simple, transparent pricing</h1>
+    <p>Choose the plan that fits your needs. Cancel anytime.</p>
+  </div>
+
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-desc">For individuals just getting started.</div>
+      <div class="plan-price">$9<span>/mo</span></div>
+      <div class="plan-billing">Billed monthly</div>
+      <ul class="plan-features">
+        <li>1 user</li>
+        <li>5 projects</li>
+        <li>2 GB storage</li>
+        <li>Email support</li>
+      </ul>
+      <a href="#" class="plan-cta">Get started</a>
+    </div>
+
+    <div class="plan featured">
+      <div class="badge">Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-desc">For growing teams that need more.</div>
+      <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-billing">Billed monthly</div>
+      <ul class="plan-features">
+        <li>5 users</li>
+        <li>Unlimited projects</li>
+        <li>50 GB storage</li>
+        <li>Priority support</li>
+        <li>Advanced analytics</li>
+      </ul>
+      <a href="#" class="plan-cta">Get started</a>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Business</div>
+      <div class="plan-desc">For larger organizations at scale.</div>
+      <div class="plan-price">$79<span>/mo</span></div>
+      <div class="plan-billing">Billed monthly</div>
+      <ul class="plan-features">
+        <li>Unlimited users</li>
+        <li>Unlimited projects</li>
+        <li>500 GB storage</li>
+        <li>24/7 phone support</li>
+        <li>Custom integrations</li>
+      </ul>
+      <a href="#" class="plan-cta">Contact sales</a>
+    </div>
+
+  </div>
+
+</body>
+</html>
