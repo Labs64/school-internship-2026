@@ -29,3 +29,8 @@ AI Claude помогает создать PricingTable для NetLicensing
 Завершил и устранил баги в таблице
 
 
+# ...
+
+```
+~/school-internship-2026/html-insertion-scripts/insert-html-content.sh -t context7PricingTable-template.html -s context7-export.html -o context7PricingTable.html --no-backup
+```

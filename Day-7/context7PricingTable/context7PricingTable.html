@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing & Plans · Forge</title>
+<style>
+  :root{
+    --bg: #170B3B;
+    --bg-soft: #1D1049;
+    --bg-card: #20114A;
+    --text: #EFE8FF;
+    --text-dim: rgba(239,232,255,0.62);
+    --text-faint: rgba(239,232,255,0.32);
+    --accent: #CEB8FF;
+    --glow: #6EFFFB;
+    --line: rgba(239,232,255,0.10);
+    --line-soft: rgba(239,232,255,0.06);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{
+    scroll-behavior:smooth;
+  }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background: #050210;
+    color: var(--text);
+    font-family: "Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  #stars{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  #border-canvas{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  #purple-overlay{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:var(--bg);
+    z-index:2;
+    pointer-events:none;
+  }
+
+  .glow-top{
+    position:fixed;
+    top:0; left:0; right:0;
+    height:520px;
+    pointer-events:none;
+    z-index:3;
+    background: radial-gradient(ellipse 80% 100% at 50% -10%, rgba(110,255,251,0.22) 0%, rgba(110,255,251,0.08) 35%, rgba(23,11,59,0) 70%);
+  }
+
+  .topbar{
+    position:relative;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    max-width:1180px;
+    margin:0 auto;
+    padding:22px 32px;
+    background:rgba(23,11,59,0.6);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:700;
+    font-size:1.05rem;
+    letter-spacing:0.01em;
+    color:var(--text);
+  }
+  .brand-mark{
+    width:26px; height:26px;
+    border-radius:7px;
+    background: linear-gradient(135deg, var(--glow), var(--accent));
+    flex-shrink:0;
+  }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    list-style:none;
+    margin:0; padding:0;
+  }
+  .nav-links a{
+    color: var(--text-dim);
+    text-decoration:none;
+    font-size:0.9rem;
+    font-weight:500;
+    padding:8px 14px;
+    border-radius:8px;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  .nav-links a:hover{
+    background: rgba(239,232,255,0.07);
+    color: var(--text);
+  }
+  .nav-links a.active{
+    color: var(--accent);
+  }
+  .nav-cta{
+    color: var(--bg) !important;
+    background: var(--glow) !important;
+    font-weight:600 !important;
+  }
+  .nav-cta:hover{
+    background: #8dfffc !important;
+  }
+
+  .hero{
+    position:relative;
+    z-index:3;
+    text-align:center;
+    max-width:680px;
+    margin:90px auto 64px;
+    padding:0 24px;
+  }
+  .hero h1{
+    font-size:3.1rem;
+    line-height:1.08;
+    margin:0 0 16px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    background: linear-gradient(180deg, var(--text) 40%, var(--accent) 130%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .hero p{
+    font-size:1.1rem;
+    color: var(--text-dim);
+    margin:0;
+    line-height:1.5;
+  }
+
+  .plan-cards{
+    position:relative;
+    z-index:3;
+    max-width:1100px;
+    margin:0 auto 90px;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+  }
+  .plan-card{
+    background: var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:30px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    position:relative;
+  }
+  .plan-card.featured{
+    border-color: rgba(206,184,255,0.4);
+    box-shadow: 0 0 0 1px rgba(206,184,255,0.15), 0 20px 60px -20px rgba(110,255,251,0.18);
+  }
+  .plan-badge{
+    position:absolute;
+    top:-12px; right:24px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .plan-card h3{
+    margin:0;
+    font-size:1.2rem;
+    font-weight:700;
+    color:var(--text);
+  }
+  .plan-price{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+  }
+  .plan-price .amount{
+    font-size:2.2rem;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .plan-price .period{
+    font-size:0.9rem;
+    color:var(--text-dim);
+  }
+  .plan-card .tagline{
+    font-size:0.88rem;
+    color:var(--text-dim);
+    margin:-6px 0 0;
+    line-height:1.5;
+  }
+  .plan-card .feat-label{
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0;
+  }
+  .plan-feats{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    font-size:0.87rem;
+    color:var(--text);
+  }
+  .plan-feats li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .plan-feats li::before{
+    content:"✓";
+    color:var(--glow);
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .plan-btn{
+    margin-top:auto;
+    width:100%;
+    padding:11px 0;
+    text-align:center;
+    border-radius:10px;
+    font-size:0.9rem;
+    font-weight:600;
+    text-decoration:none;
+    border:1px solid var(--line);
+    color:var(--text);
+    background:transparent;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .plan-btn:hover{
+    background: rgba(239,232,255,0.06);
+    border-color: rgba(239,232,255,0.25);
+  }
+  .plan-btn.primary{
+    background: var(--glow);
+    color: var(--bg);
+    border-color: var(--glow);
+  }
+  .plan-btn.primary:hover{
+    background:#8dfffc;
+  }
+
+  /* ================================================================ */
+  /*  COMPARE TABLE — CSS only, NetLicensing HTML untouched            */
+  /* ================================================================ */
+
+  .compare-section{
+    position:relative;
+    z-index:3;
+    max-width:900px;
+    margin:0 auto 100px;
+    padding:0 24px;
+  }
+  .compare-section > h2{
+    text-align:center;
+    color:var(--text);
+    font-size:1.6rem;
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .compare-section > .sub{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:0.95rem;
+    margin:0 0 38px;
+  }
+
+  /* --- table wrapper --- */
+  .nlic-pricing-table{
+    display:grid;
+    grid-template-columns:200px repeat(4,1fr);
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    overflow:hidden;
+    font-family:inherit;
+    color:var(--text);
+  }
+
+  .nlic-column{
+    border-right:1px solid var(--line);
+  }
+  .nlic-column:last-of-type{
+    border-right:none;
+  }
+
+  /* --- left label column --- */
+  .nlic-column-skus{
+    background:rgba(255,255,255,0.02);
+  }
+  .nlic-column-skus .nlic-column-head{
+    height:54px;
+    border-bottom:1px solid var(--line);
+  }
+  .nlic-column-skus .nlic-plan-name,
+  .nlic-column-skus .nlic-plan-description,
+  .nlic-column-skus .nlic-plan-price{
+    display:none;
+  }
+  .nlic-column-skus .nlic-sku-list{
+    margin:0;
+    padding:0;
+    list-style:none;
+  }
+  .nlic-column-skus .nlic-sku-item{
+    padding:0 20px;
+    font-size:0.82rem;
+    color:var(--text-dim);
+    height:48px;
+    display:flex;
+    align-items:center;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nlic-column-skus .nlic-sku-item:last-child{
+    border-bottom:none;
+  }
+
+  /* --- plan columns --- */
+  .nlic-plan-column{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .nlic-column-head{
+    height:54px;
+    padding:0 20px;
+    border-bottom:1px solid var(--line);
+    border-left:1px solid var(--line-soft);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .nlic-plan-name{
+    font-size:0.9rem;
+    font-weight:700;
+    color:var(--text);
+    margin:0;
+  }
+  .nlic-plan-description{
+    display:none;
+  }
+  .nlic-plan-price{
+    display:flex;
+    justify-content:center;
+    align-items:baseline;
+    gap:3px;
+    margin:0;
+  }
+
+  /* Pro / Business / Business Plus: € prefix, hide currency code */
+  .nlic-column-LT_PRO .nlic-plan-price-amount::before,
+  .nlic-column-LT_BUSINESS .nlic-plan-price-amount::before,
+  .nlic-column-LT_BUSINESS_PLUS .nlic-plan-price-amount::before{
+    content:"€";
+    font-size:0.9rem;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .nlic-column-LT_PRO .nlic-plan-price-currency,
+  .nlic-column-LT_BUSINESS .nlic-plan-price-currency,
+  .nlic-column-LT_BUSINESS_PLUS .nlic-plan-price-currency{
+    display:none;
+  }
+
+  /* Enterprise: "Custom" */
+  .nlic-column-LT_ENTERPRISE .nlic-plan-price-amount,
+  .nlic-column-LT_ENTERPRISE .nlic-plan-price-currency,
+  .nlic-column-LT_ENTERPRISE .nlic-plan-price-period-separator,
+  .nlic-column-LT_ENTERPRISE .nlic-plan-price-period{
+    display:none;
+  }
+  .nlic-column-LT_ENTERPRISE .nlic-plan-price::before{
+    content:"Custom";
+    font-size:0.9rem;
+    font-weight:700;
+    color:var(--accent);
+  }
+
+  /* --- feature / quota rows --- */
+  .nlic-plan-column .nlic-sku-list{
+    margin:0;
+    padding:0;
+    list-style:none;
+  }
+  .nlic-plan-column .nlic-sku-feature,
+  .nlic-plan-column .nlic-sku-quota{
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid var(--line-soft);
+    border-left:1px solid var(--line-soft);
+    text-align:center;
+  }
+  .nlic-plan-column .nlic-sku-description{
+    display:none;
+  }
+
+  /* --- checkmarks & dashes --- */
+  .nlic-sku-feature-item{
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.9rem;
+    font-weight:700;
+  }
+  .nlic-sku-feature-enabled .nlic-sku-feature-item::after{
+    content:"✓";
+    color:var(--glow);
+  }
+  .nlic-sku-feature-disabled .nlic-sku-feature-item::after{
+    content:"–";
+    color:var(--text-faint);
+  }
+
+  /* --- quota values --- */
+  .nlic-sku-quota-item{
+    font-size:0.82rem;
+    font-weight:600;
+    color:var(--text);
+    text-align:center;
+  }
+  .nlic-sku-quota-item[data-value="0"]{
+    color:var(--text-faint);
+    font-weight:400;
+  }
+  .nlic-plan-column .nlic-sku-quota-item[data-value="-1"]{
+    color:var(--glow);
+    font-size:0;
+  }
+  .nlic-plan-column .nlic-sku-quota-item[data-value="-1"]::after{
+    content:"Unlimited";
+    font-size:0.82rem;
+    font-weight:600;
+    color:var(--glow);
+  }
+
+  .nlic-action{
+    display:none;
+  }
+
+  .nlic-attribution{
+    text-align:center;
+    font-size:0.72rem;
+    color:var(--text-faint);
+    padding:16px 0 4px;
+    width:100%;
+    grid-column:1/-1;
+  }
+  .nlic-attribution a{
+    color:var(--text-dim);
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq-section{
+    position:relative;
+    z-index:3;
+    max-width:760px;
+    margin:0 auto 110px;
+    padding:0 24px;
+  }
+  .faq-section h2{
+    text-align:center;
+    font-size:1.6rem;
+    font-weight:700;
+    margin:0 0 38px;
+    color:var(--text);
+  }
+  .faq-cat{
+    font-size:0.78rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:40px 0 4px;
+  }
+  .faq-cat:first-of-type{
+    margin-top:0;
+  }
+  .faq-item{
+    border-bottom:1px solid var(--line);
+    padding:18px 4px;
+  }
+  .faq-item summary{
+    cursor:pointer;
+    font-size:0.98rem;
+    font-weight:600;
+    color: var(--text);
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{
+    content:"+";
+    color: var(--accent);
+    font-size:1.2rem;
+    font-weight:400;
+    margin-left:16px;
+    transition: transform 0.2s ease;
+  }
+  .faq-item[open] summary::after{
+    transform: rotate(45deg);
+  }
+  .faq-item p{
+    margin:14px 0 0;
+    font-size:0.9rem;
+    color: var(--text-dim);
+    line-height:1.6;
+  }
+
+  footer.page-footer{
+    position:relative;
+    z-index:3;
+    text-align:center;
+    padding:28px 24px 50px;
+    font-size:0.8rem;
+    color: var(--text-faint);
+  }
+
+  @media (max-width:860px){
+    .plan-cards{ grid-template-columns:1fr; }
+    .hero h1{ font-size:2.2rem; }
+    .nav-links{ display:none; }
+    .nlic-pricing-table{ grid-template-columns:1fr; }
+    .nlic-column-skus{ display:none; }
+    .nlic-plan-column .nlic-sku-description{ display:block; font-size:0.82rem; color:var(--text-dim); margin-bottom:4px; }
+    .nlic-plan-column .nlic-sku-feature,
+    .nlic-plan-column .nlic-sku-quota{
+      height:auto; min-height:46px; flex-direction:column; padding:10px 22px;
+    }
+    .nlic-column-head{ height:auto; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<canvas id="border-canvas"></canvas>
+<div id="purple-overlay"></div>
+<canvas id="mask" style="display:none"></canvas>
+
+<div class="glow-top"></div>
+
+<nav class="topbar">
+  <div class="brand"><img src="https://netlicensing.io/img/labs64-avatar-30x30.png" alt="NetLicensing" style="width:26px;height:26px;border-radius:7px;">NetLicensing</div>
+  <ul class="nav-links">
+    <li><a href="#">Sign in</a></li>
+    <li><a href="#">Install</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#plans" class="active">Pricing</a></li>
+    <li><a href="#compare">Compare</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#" class="nav-cta">Get started</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="plans">
+  <h1>Pricing &amp; Plans</h1>
+  <p>Simple, transparent pricing for individuals and teams.</p>
+</header>
+
+<section class="plan-cards">
+
+  <div class="plan-card">
+    <h3>Pro</h3>
+    <div class="plan-price"><span class="amount">€12.40</span><span class="period">/ month</span></div>
+    <p class="tagline">For small teams getting started with meetings.</p>
+    <ul class="plan-feats">
+      <li>Up to 100 participants</li>
+      <li>Unlimited meeting duration</li>
+      <li>5 GB cloud storage</li>
+      <li>AI Companion</li>
+    </ul>
+    <a href="#" class="plan-btn">Get started</a>
+  </div>
+
+  <div class="plan-card featured">
+    <span class="plan-badge">Most popular</span>
+    <h3>Business</h3>
+    <div class="plan-price"><span class="amount">€17.05</span><span class="period">/ month</span></div>
+    <p class="tagline">For growing teams that need more control.</p>
+    <p class="feat-label">Pro features, plus</p>
+    <ul class="plan-feats">
+      <li>Up to 300 participants</li>
+      <li>Unlimited cloud storage</li>
+      <li>Single Sign-On (SSO)</li>
+      <li>Managed domains &amp; admin dashboard</li>
+    </ul>
+    <a href="#" class="plan-btn primary">Start free trial</a>
+  </div>
+
+  <div class="plan-card">
+    <h3>Business Plus</h3>
+    <div class="plan-price"><span class="amount">€20.92</span><span class="period">/ month</span></div>
+    <p class="tagline">For teams that need advanced telephony.</p>
+    <p class="feat-label">Business features, plus</p>
+    <ul class="plan-feats">
+      <li>Up to 300 participants</li>
+      <li>Unlimited cloud storage</li>
+      <li>Unlimited US/CA calling</li>
+      <li>SSO, managed domains &amp; admin dashboard</li>
+    </ul>
+    <a href="#" class="plan-btn">Get started</a>
+  </div>
+
+  <div class="plan-card">
+    <h3>Enterprise</h3>
+    <div class="plan-price"><span class="amount">Custom</span></div>
+    <p class="tagline">For large organizations with advanced needs.</p>
+    <p class="feat-label">Business Plus features, plus</p>
+    <ul class="plan-feats">
+      <li>Up to 1,000 participants</li>
+      <li>Unlimited cloud storage</li>
+      <li>Dedicated Customer Success Manager</li>
+      <li>All features included</li>
+    </ul>
+    <a href="#" class="plan-btn">Contact sales</a>
+  </div>
+
+</section>
+
+<section class="compare-section" id="compare">
+  <h2>Compare plans in detail</h2>
+  <p class="sub">Every feature, quota, and limit, side by side.</p>
+
+<!-- BEGIN:PricingTable -->
+<!--Generated by NetLicensing.IO - Innovative License Management Solution on 2026-06-29 10:44:23-->
+<div class="nlic-pricing-table"
+     data-plan-count="3"
+     data-layout="table">
+
+            <div class="nlic-column nlic-column-skus">
+                <div>
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price=""
+                             data-currency=""
+                             data-period="">
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-item nlic-sku-PUBLIC_REPOS">Public Repositories</li>
+                                <li class="nlic-sku-item nlic-sku-PRIVATE_REPOS">Private Repositories</li>
+                                <li class="nlic-sku-item nlic-sku-ACCESS_CONTROL">Access Control</li>
+                                <li class="nlic-sku-item nlic-sku-OAUTH2">OAuth 2.0</li>
+                                <li class="nlic-sku-item nlic-sku-TEAM_COLLAB">Team Collaboration</li>
+                                <li class="nlic-sku-item nlic-sku-GDPR">GDPR Compliance</li>
+                                <li class="nlic-sku-item nlic-sku-SOC2">SOC-2 Compliance</li>
+                                <li class="nlic-sku-item nlic-sku-SSO">SSO (SAML / OIDC)</li>
+                                <li class="nlic-sku-item nlic-sku-SELF_HOSTED">Self-Hosted (On-Premise)</li>
+                                <li class="nlic-sku-item nlic-sku-SUPP_COMMUNITY">Community Support</li>
+                                <li class="nlic-sku-item nlic-sku-SUPP_EMAIL">Email Support</li>
+                                <li class="nlic-sku-item nlic-sku-SUPP_DEDICATED">Dedicated Support</li>
+                                <li class="nlic-sku-item nlic-sku-API_CALLS_INCL">Included API Calls</li>
+                                <li class="nlic-sku-item nlic-sku-API_CALLS_EXTRA">Additional API Calls</li>
+                                <li class="nlic-sku-item nlic-sku-PRIVATE_PARSING">Private Repo Parsing (tokens)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-FREE"
+                 data-plan="FREE"
+                 data-plan-name="Free">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Free
+                        </div>
+                        <div class="nlic-plan-description">
+                            For individuals. Public Repos, Access Control, OAuth 2.0. 1,000 API calls / month.
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="0.00"
+                             data-currency="EUR"
+                             data-period="">
+                                <span class="nlic-plan-price-amount">0.00</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-feature nlic-sku-PUBLIC_REPOS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Public Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PRIVATE_REPOS nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Private Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ACCESS_CONTROL nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Access Control
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-OAUTH2 nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        OAuth 2.0
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-TEAM_COLLAB nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Team Collaboration
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-GDPR nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        GDPR Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SOC2 nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        SOC-2 Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        SSO (SAML / OIDC)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SELF_HOSTED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Self-Hosted (On-Premise)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_COMMUNITY nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Community Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_EMAIL nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Email Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_DEDICATED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_INCL">
+                                    <div class="nlic-sku-description">
+                                        Included API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="1000">
+                                                1000
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_EXTRA">
+                                    <div class="nlic-sku-description">
+                                        Additional API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="0">
+                                                0
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-PRIVATE_PARSING">
+                                    <div class="nlic-sku-description">
+                                        Private Repo Parsing (tokens)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="0">
+                                                0
+                                            </div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-FREE">
+                            <a href="https://netlicensing.io?plan=free"
+                               class="nlic-action-url"></a>
+                        </div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-PRO"
+                 data-plan="PRO"
+                 data-plan-name="Pro">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Pro
+                        </div>
+                        <div class="nlic-plan-description">
+                            For professionals. €10 per seat / month. Private Repos, Team Collaboration, 5,000 included API calls / seat, then €10 per 1,000. Private repo parsing €25 / 1M tokens.
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="10.00"
+                             data-currency="EUR"
+                             data-period="">
+                                <span class="nlic-plan-price-amount">10.00</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-feature nlic-sku-PUBLIC_REPOS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Public Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PRIVATE_REPOS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Private Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ACCESS_CONTROL nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Access Control
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-OAUTH2 nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        OAuth 2.0
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-TEAM_COLLAB nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Team Collaboration
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-GDPR nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        GDPR Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SOC2 nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        SOC-2 Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        SSO (SAML / OIDC)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SELF_HOSTED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Self-Hosted (On-Premise)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_COMMUNITY nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Community Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_EMAIL nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Email Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_DEDICATED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_INCL">
+                                    <div class="nlic-sku-description">
+                                        Included API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="5000">
+                                                5000
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_EXTRA">
+                                    <div class="nlic-sku-description">
+                                        Additional API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-PRIVATE_PARSING">
+                                    <div class="nlic-sku-description">
+                                        Private Repo Parsing (tokens)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-PRO">
+                            <a href="https://netlicensing.io?plan=pro"
+                               class="nlic-action-url"></a>
+                        </div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-ENTERPRISE"
+                 data-plan="ENTERPRISE"
+                 data-plan-name="Enterprise">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Enterprise
+                        </div>
+                        <div class="nlic-plan-description">
+                            For enterprises. Custom pricing (from €30/user/month down to €2.50/user/month at scale). Everything in Pro plus SOC-2, SSO (SAML/OIDC), Self-Hosted. 5,000 included API calls / seat, then €10 per 1,000. Private repo parsing €25 / 1M tokens.
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="0.00"
+                             data-currency="EUR"
+                             data-period="">
+                                <span class="nlic-plan-price-amount">0.00</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-feature nlic-sku-PUBLIC_REPOS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Public Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PRIVATE_REPOS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Private Repositories
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ACCESS_CONTROL nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Access Control
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-OAUTH2 nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        OAuth 2.0
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-TEAM_COLLAB nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Team Collaboration
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-GDPR nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        GDPR Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SOC2 nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        SOC-2 Compliance
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        SSO (SAML / OIDC)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SELF_HOSTED nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Self-Hosted (On-Premise)
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_COMMUNITY nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Community Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_EMAIL nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Email Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SUPP_DEDICATED nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated Support
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_INCL">
+                                    <div class="nlic-sku-description">
+                                        Included API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="5000">
+                                                5000
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-API_CALLS_EXTRA">
+                                    <div class="nlic-sku-description">
+                                        Additional API Calls
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-PRIVATE_PARSING">
+                                    <div class="nlic-sku-description">
+                                        Private Repo Parsing (tokens)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-ENTERPRISE">
+                            <a href="https://netlicensing.io?plan=enterprise"
+                               class="nlic-action-url"></a>
+                        </div>
+                </div>
+            </div>
+        <div class="nlic-attribution">
+            Powered by <a href="https://netlicensing.io" rel="nofollow">Labs64 NetLicensing</a>
+        </div>
+</div>
+<!-- END:PricingTable -->
+</section>
+
+<section class="faq-section" id="faq">
+  <h2>Frequently Asked Questions</h2>
+
+  <h3 class="faq-cat">Usage &amp; Limits</h3>
+
+  <details class="faq-item" open>
+    <summary>What happens if I go over my included API calls?</summary>
+    <p>On the Free plan, requests are capped at 1,000 calls per month. On Pro and Enterprise, additional calls beyond your included quota are billed at €10 per 1,000 calls — your access is never blocked.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>How is the included API quota counted on Pro?</summary>
+    <p>Each seat on your Pro team gets its own allocation of 5,000 API calls per month. Limits are per seat, not pooled across the team, so unused calls from one seat don't carry over to cover another seat's overage.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>What is private repo parsing used for?</summary>
+    <p>Private repo parsing tokens cover indexing and analysis of private repository content, billed at €25 per 1 million tokens on Pro and Enterprise plans. This applies when a private repo is added or refreshed.</p>
+  </details>
+
+  <h3 class="faq-cat">Pricing &amp; Plans</h3>
+
+  <details class="faq-item">
+    <summary>Can I switch plans at any time?</summary>
+    <p>Yes. You can upgrade or downgrade between Free, Pro, and Enterprise whenever you like. Changes take effect at the start of your next billing cycle.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>What's included in the Free plan?</summary>
+    <p>Free includes public repositories, access control, OAuth 2.0, and 1,000 API calls per month. It's a solid starting point if you don't yet need private repos or team collaboration.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can I add private repositories on the Free plan?</summary>
+    <p>No — private repositories are only available on Pro and Enterprise. You'll need to upgrade to work with private repos and collaborate with a team.</p>
+  </details>
+
+  <h3 class="faq-cat">Security &amp; Compliance</h3>
+
+  <details class="faq-item">
+    <summary>Is self-hosting available outside Enterprise?</summary>
+    <p>Self-hosted, on-premise deployment is currently an Enterprise-only feature, alongside SSO (SAML/OIDC) and SOC-2 compliance.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>Is GDPR compliance available on every plan?</summary>
+    <p>Yes. GDPR compliance applies across Free, Pro, and Enterprise. SOC-2 and SSO are additionally available starting on Enterprise.</p>
+  </details>
+
+  <h3 class="faq-cat">Enterprise</h3>
+
+  <details class="faq-item">
+    <summary>How does Enterprise pricing scale?</summary>
+    <p>Enterprise pricing ranges from €30 per user per month down to €2.50 per user per month as your seat count grows. Contact sales for a quote tailored to your team.</p>
+  </details>
+
+  <details class="faq-item">
+    <summary>What's the difference between Pro and Enterprise?</summary>
+    <p>Enterprise includes everything in Pro, plus SOC-2 compliance, SSO (SAML/OIDC), self-hosted on-premise deployment, volume-based pricing, and dedicated support.</p>
+  </details>
+
+</section>
+
+<footer class="page-footer">
+  © 2026 Forge. All rights reserved.
+</footer>
+
+<script>
+(function(){
+  var starsCanvas = document.getElementById('stars');
+  var sCtx = starsCanvas.getContext('2d');
+  var borderCanvas = document.getElementById('border-canvas');
+  var bCtx = borderCanvas.getContext('2d');
+  var maskCanvas = document.getElementById('mask');
+  var mCtx = maskCanvas.getContext('2d');
+  var overlay = document.getElementById('purple-overlay');
+
+  function resize(){
+    starsCanvas.width = maskCanvas.width = borderCanvas.width = window.innerWidth;
+    starsCanvas.height = maskCanvas.height = borderCanvas.height = window.innerHeight;
+    drawStars();
+  }
+
+  var stars = [];
+  function initStars(){
+    stars = [];
+    var count = Math.floor((window.innerWidth * window.innerHeight) / 700);
+    for(var i = 0; i < count; i++){
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 2.2 + 0.3,
+        a: Math.random() * 0.7 + 0.3,
+        glow: Math.random() < 0.15,
+        twinkle: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.02 + 0.005
+      });
+    }
+  }
+
+  function drawStars(){
+    sCtx.fillStyle = '#050210';
+    sCtx.fillRect(0, 0, starsCanvas.width, starsCanvas.height);
+    for(var i = 0; i < stars.length; i++){
+      var s = stars[i];
+      var flicker = 0.7 + 0.3 * Math.sin(s.twinkle);
+      var alpha = s.a * flicker;
+
+      if(s.glow){
+        sCtx.shadowBlur = 6 + s.r * 3;
+        sCtx.shadowColor = 'rgba(200,220,255,' + (alpha * 0.6).toFixed(2) + ')';
+      }
+
+      sCtx.beginPath();
+      sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      sCtx.fillStyle = 'rgba(255,255,255,' + alpha.toFixed(2) + ')';
+      sCtx.fill();
+
+      sCtx.shadowBlur = 0;
+      sCtx.shadowColor = 'transparent';
+    }
+  }
+
+  function animateStars(){
+    for(var i = 0; i < stars.length; i++){
+      stars[i].twinkle += stars[i].speed;
+    }
+    drawStars();
+    requestAnimationFrame(animateStars);
+  }
+
+  resize();
+  initStars();
+  animateStars();
+  window.addEventListener('resize', function(){ resize(); initStars(); });
+
+  // --- Eraser mask ---
+  mCtx.fillStyle = '#ffffff';
+  mCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+  var trail = [];
+  var maxLen = 150;
+  var mouseX = -1000, mouseY = -1000;
+  var isDrawing = false;
+  var hideTimer = null;
+  var currentOpacity = 1;
+  var targetOpacity = 1;
+
+  function updateMask(){
+    mCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+    mCtx.fillStyle = '#ffffff';
+    mCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+    bCtx.clearRect(0, 0, borderCanvas.width, borderCanvas.height);
+
+    currentOpacity += (targetOpacity - currentOpacity) * 0.06;
+    if(currentOpacity < 0.01 && trail.length === 0) return;
+
+    var now = Date.now();
+
+    mCtx.globalCompositeOperation = 'destination-out';
+    mCtx.lineCap = 'round';
+    mCtx.lineJoin = 'round';
+
+    for(var i = 0; i < trail.length - 1; i++){
+      var t = trail[i];
+      var age = (now - t.time) / 1200;
+      var fade = Math.max(0, 1 - age);
+      if(fade <= 0) continue;
+
+      var a = fade * fade * fade * currentOpacity;
+      var w = 80 * fade;
+
+      mCtx.beginPath();
+      mCtx.moveTo(t.x, t.y);
+      mCtx.lineTo(trail[i+1].x, trail[i+1].y);
+      mCtx.lineWidth = w;
+      mCtx.strokeStyle = 'rgba(0,0,0,' + a + ')';
+      mCtx.stroke();
+    }
+
+    mCtx.globalCompositeOperation = 'source-over';
+
+    bCtx.lineCap = 'round';
+    bCtx.lineJoin = 'round';
+
+    for(var i = 0; i < trail.length - 1; i++){
+      var t = trail[i];
+      var age = (now - t.time) / 1200;
+      var fade = Math.max(0, 1 - age);
+      if(fade <= 0) continue;
+
+      var a = fade * fade * fade * currentOpacity * 0.5;
+      var w = 80 * fade + 4;
+
+      bCtx.globalCompositeOperation = 'source-over';
+      bCtx.beginPath();
+      bCtx.moveTo(t.x, t.y);
+      bCtx.lineTo(trail[i+1].x, trail[i+1].y);
+      bCtx.lineWidth = w;
+      bCtx.strokeStyle = 'rgba(5,2,20,' + a + ')';
+      bCtx.stroke();
+
+      bCtx.globalCompositeOperation = 'destination-out';
+      bCtx.beginPath();
+      bCtx.moveTo(t.x, t.y);
+      bCtx.lineTo(trail[i+1].x, trail[i+1].y);
+      bCtx.lineWidth = w - 4;
+      bCtx.strokeStyle = 'rgba(0,0,0,1)';
+      bCtx.stroke();
+    }
+
+    bCtx.globalCompositeOperation = 'source-over';
+
+    overlay.style.webkitMaskImage = 'url(' + maskCanvas.toDataURL() + ')';
+    overlay.style.maskImage = 'url(' + maskCanvas.toDataURL() + ')';
+  }
+
+  document.addEventListener('mousemove', function(e){
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    var last = trail[trail.length - 1];
+    if(!last || Math.hypot(e.clientX - last.x, e.clientY - last.y) > 3){
+      trail.push({x: e.clientX, y: e.clientY, time: Date.now()});
+      if(trail.length > maxLen) trail.shift();
+    }
+
+    if(!isDrawing){
+      isDrawing = true;
+      targetOpacity = 1;
+    }
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function(){
+      isDrawing = false;
+      targetOpacity = 0;
+    }, 200);
+  });
+
+  document.addEventListener('mouseleave', function(){
+    isDrawing = false;
+    targetOpacity = 0;
+  });
+
+  function loop(){
+    var now = Date.now();
+    trail = trail.filter(function(t){ return now - t.time < 1200; });
+    updateMask();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+</body>
+</html>
