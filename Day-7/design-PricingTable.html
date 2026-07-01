@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Table — Universal Design</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card-bg: #ffffff;
+    --text-main: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --bad: #d1d5db;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    padding: 40px 20px 80px;
+  }
+
+  /* ---------- Pricing header ---------- */
+  .pricing-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 48px;
+  }
+  .pricing-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .pricing-header p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+  }
+
+  /* ---------- Pricing grid ---------- */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--plan-count, 3), 1fr);
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .plan {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .plan:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  }
+  .plan.featured {
+    border: 2px solid var(--accent);
+    position: relative;
+  }
+  .badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .plan-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .plan-price {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .plan-price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+  .plan-billing {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  .plan-features {
+    list-style: none;
+    margin-bottom: 28px;
+    flex-grow: 1;
+  }
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+  .plan-features li .mark {
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 14px;
+  }
+  .plan-features li.enabled .mark { color: var(--accent); }
+  .plan-features li.disabled { color: var(--bad); }
+  .plan-features li.disabled .mark { color: var(--bad); }
+  .plan-features li .quota-value {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    padding-left: 8px;
+  }
+
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .plan-cta:hover { background: var(--accent-light); }
+  .plan.featured .plan-cta {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+  }
+  .plan.featured .plan-cta:hover { background: #4338ca; }
+
+  .attribution {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .attribution a { color: var(--accent); text-decoration: none; }
+
+  .empty-state {
+    max-width: 600px;
+    margin: 60px auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 900px) {
+    .pricing-grid { grid-template-columns: 1fr !important; max-width: 420px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="pricing-header">
+    <h1 id="headerTitle">Simple, transparent pricing</h1>
+    <p id="headerSubtitle">Choose the plan that fits your needs. Cancel anytime.</p>
+  </div>
+
+  <div id="pricingContainer"></div>
+
+<script>
+(function() {
+  const container = document.getElementById('pricingContainer');
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function formatPrice(amount, currency) {
+    const n = parseFloat(amount);
+    if (isNaN(n)) return null;
+    const symbolMap = { EUR: '€', USD: '$', GBP: '£' };
+    const symbol = symbolMap[(currency || '').toUpperCase()];
+    const formatted = (n % 1 === 0) ? n.toFixed(0) : n.toFixed(2);
+    if (symbol) return symbol + formatted;
+    return formatted + (currency ? ' ' + currency : '');
+  }
+
+  function formatQuotaValue(val) {
+    if (val === null || val === undefined || val === '') return null;
+    const n = parseFloat(val);
+    if (!isNaN(n)) {
+      if (n < 0) return 'Unlimited';
+      return n.toLocaleString('en-US');
+    }
+    return val;
+  }
+
+  // Generic parser: works with NetLicensing-style export markup
+  // (.nlic-pricing-table / .nlic-plan-column / .nlic-sku-feature / .nlic-sku-quota)
+  // and degrades gracefully for slightly different markups by relying on
+  // class-name substring matching rather than exact selectors.
+  function parseExport(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    const root = doc.querySelector('[class*="pricing-table"], [class*="pricing_table"]') || doc.body;
+    if (!root) return null;
+
+    let planNodes = Array.from(root.querySelectorAll('[class*="plan-column"]'))
+      .filter(n => !/column-skus|column_skus/i.test(n.className));
+
+    // The export markup can nest a duplicate ".plan-column" wrapper inside
+    // the outer plan column (outer = ".nlic-column.nlic-plan-column.nlic-column-FREE",
+    // inner = ".nlic-plan-column"). Both match the selector above, which would
+    // double-count every plan. Keep only the outermost match per branch.
+    planNodes = planNodes.filter(n => !planNodes.some(other => other !== n && other.contains(n)));
+
+    if (planNodes.length === 0) return null;
+
+    const attribution = root.querySelector('[class*="attribution"]');
+    let attributionHtml = null;
+    if (attribution) {
+      const link = attribution.querySelector('a');
+      attributionHtml = link
+        ? { text: link.textContent.trim(), href: link.getAttribute('href') }
+        : { text: attribution.textContent.trim(), href: null };
+    }
+
+    const plans = planNodes.map(node => {
+      const nameEl = node.querySelector('[class*="plan-name"]');
+      const descEl = node.querySelector('[class*="plan-description"]');
+      const priceEl = node.querySelector('[class*="plan-price"]');
+
+      const name = nameEl ? nameEl.textContent.trim() : (node.getAttribute('data-plan-name') || node.getAttribute('data-plan') || 'Plan');
+      const description = descEl ? descEl.textContent.trim() : '';
+
+      let priceAmount = null, priceCurrency = '';
+      if (priceEl) {
+        priceAmount = priceEl.getAttribute('data-price');
+        priceCurrency = priceEl.getAttribute('data-currency') || '';
+        if (priceAmount === null) {
+          const amountEl = priceEl.querySelector('[class*="price-amount"]');
+          const currEl = priceEl.querySelector('[class*="price-currency"]');
+          priceAmount = amountEl ? amountEl.textContent.trim() : priceEl.textContent.trim();
+          priceCurrency = currEl ? currEl.textContent.trim() : priceCurrency;
+        }
+      }
+
+      // Features: any li with class containing "sku-feature"
+      const featureNodes = Array.from(node.querySelectorAll('[class*="sku-feature"]'));
+      const features = featureNodes.map(li => {
+        const label = li.querySelector('[class*="sku-description"]');
+        const enabled = /feature-enabled/i.test(li.className);
+        const disabled = /feature-disabled/i.test(li.className);
+        return {
+          label: label ? label.textContent.trim() : li.textContent.trim(),
+          enabled: enabled || !disabled
+        };
+      });
+
+      // Quotas: any li with class containing "sku-quota"
+      const quotaNodes = Array.from(node.querySelectorAll('[class*="sku-quota"]'));
+      const quotas = quotaNodes.map(li => {
+        const label = li.querySelector('[class*="sku-description"]');
+        const valEl = li.querySelector('[class*="quota-item"]');
+        const rawVal = valEl ? (valEl.getAttribute('data-value') || valEl.textContent.trim()) : null;
+        return {
+          label: label ? label.textContent.trim() : li.textContent.trim(),
+          value: formatQuotaValue(rawVal)
+        };
+      });
+
+      const actionLink = node.querySelector('[class*="action-url"], [class*="action"] a');
+      const ctaHref = actionLink ? actionLink.getAttribute('href') : '#';
+      let ctaLabel = actionLink && actionLink.textContent.trim() ? actionLink.textContent.trim() : 'Get started';
+
+      const isFeatured = /featured|popular|highlight/i.test(node.className) ||
+                          /pro/i.test(node.getAttribute('data-plan') || '');
+
+      return {
+        name, description,
+        price: formatPrice(priceAmount, priceCurrency),
+        priceRaw: priceAmount,
+        features, quotas,
+        ctaHref, ctaLabel,
+        featured: isFeatured
+      };
+    });
+
+    return { plans, attribution: attributionHtml };
+  }
+
+  function render(data) {
+    if (!data || !data.plans || data.plans.length === 0) {
+      container.innerHTML = '<div class="empty-state">Не удалось распознать структуру экспорта. Проверьте HTML между маркерами BEGIN:PricingTable / END:PricingTable.</div>';
+      return;
+    }
+
+    document.documentElement.style.setProperty('--plan-count', data.plans.length);
+
+    const cardsHtml = data.plans.map(plan => {
+      const featuresHtml = plan.features.map(f => `
+        <li class="${f.enabled ? 'enabled' : 'disabled'}">
+          <span class="mark">${f.enabled ? '✓' : '–'}</span>
+          <span>${escapeHtml(f.label)}</span>
+        </li>`).join('');
+
+      const quotasHtml = plan.quotas.map(q => `
+        <li class="enabled">
+          <span class="mark">✓</span>
+          <span>${escapeHtml(q.label)}</span>
+          <span class="quota-value">${escapeHtml(q.value)}</span>
+        </li>`).join('');
+
+      const priceBlock = plan.price
+        ? `<div class="plan-price">${escapeHtml(plan.price)}<span>/mo</span></div><div class="plan-billing">Billed monthly</div>`
+        : `<div class="plan-price" style="font-size:1.4rem;">By request</div><div class="plan-billing">Contact us for pricing</div>`;
+
+      return `
+        <div class="plan ${plan.featured ? 'featured' : ''}">
+          ${plan.featured ? '<div class="badge">Most popular</div>' : ''}
+          <div class="plan-name">${escapeHtml(plan.name)}</div>
+          <div class="plan-desc">${escapeHtml(plan.description)}</div>
+          ${priceBlock}
+          <ul class="plan-features">
+            ${featuresHtml}
+            ${quotasHtml}
+          </ul>
+          <a href="${escapeHtml(plan.ctaHref)}" class="plan-cta" target="_blank" rel="noopener">${escapeHtml(plan.ctaLabel)}</a>
+        </div>`;
+    }).join('');
+
+    const attributionHtml = data.attribution
+      ? `<div class="attribution">Powered by <a href="${escapeHtml(data.attribution.href || '#')}" target="_blank" rel="noopener">${escapeHtml(data.attribution.text)}</a></div>`
+      : '';
+
+    container.innerHTML = `<div class="pricing-grid">${cardsHtml}</div>${attributionHtml}`;
+  }
+
+  // ============================================================
+  // Рендер запускается автоматически после полной загрузки страницы
+  // (DOMContentLoaded), используя HTML экспорта, вставленный между
+  // маркерами <!-- BEGIN:PricingTable --> и <!-- END:PricingTable -->.
+  // Ждём полной загрузки, чтобы блок с экспортом точно уже был
+  // прочитан браузером, независимо от его расположения в файле.
+  // ============================================================
+  function runRender() {
+    const exportSourceEl = document.getElementById('pricingExportSource');
+    if (exportSourceEl) {
+      try {
+        const data = parseExport(exportSourceEl.innerHTML);
+        // Диагностика для отладки кэша: откройте консоль браузера (F12),
+        // чтобы проверить, какие именно планы были реально распознаны
+        // из текущего файла. Если здесь старые названия — значит браузер
+        // показывает закэшированную версию страницы (нужен жёсткий
+        // перезапуск Ctrl+Shift+R / Cmd+Shift+R), а не проблема в коде.
+        if (data && data.plans) {
+          console.log('[PricingTable] Загружено в:', new Date().toLocaleTimeString());
+          console.log('[PricingTable] Распознано планов:', data.plans.length);
+          console.log('[PricingTable] Названия планов:', data.plans.map(p => p.name));
+        } else {
+          console.log('[PricingTable] Экспорт не распознан, данные:', data);
+        }
+        render(data);
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="empty-state">Ошибка при разборе экспорта между маркерами BEGIN:PricingTable / END:PricingTable.</div>';
+      }
+    } else {
+      container.innerHTML = '<div class="empty-state">Блок pricingExportSource не найден в коде страницы.</div>';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runRender);
+  } else {
+    runRender();
+  }
+})();
+</script>
+
+<!--
+  ============================================================
+  СЮДА ВСТАВЛЯЙТЕ ЭКСПОРТ ПРАЙС-ТАБЛИЦЫ.
+  Удалите текущий HTML между маркерами BEGIN:PricingTable и
+  END:PricingTable и вставьте на его место новый экспорт
+  (например, скопированный из NetLicensing) — как есть, без
+  изменений. Дизайн страницы при этом не меняется — меняются
+  только данные. Этот блок скрыт (hidden) и не отображается
+  на странице, используется только как источник данных.
+  ============================================================
+-->
+<div id="pricingExportSource" hidden>
+<!-- BEGIN:PricingTable -->
+ <!--Generated by NetLicensing.IO - Innovative License Management Solution on 2026-06-29 10:44:07-->
+<div class="nlic-pricing-table"
+     data-plan-count="4"
+     data-layout="table">
+
+            <div class="nlic-column nlic-column-skus">
+                <div>
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price=""
+                             data-currency=""
+                             data-period="">
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-item nlic-sku-PARTICIPANTS">Max Meeting Participants</li>
+                                <li class="nlic-sku-item nlic-sku-MEETING_DURATION">Meeting Duration (min)</li>
+                                <li class="nlic-sku-item nlic-sku-CLOUD_STORAGE">Cloud Storage (GB)</li>
+                                <li class="nlic-sku-item nlic-sku-AI_COMPANION">AI Companion</li>
+                                <li class="nlic-sku-item nlic-sku-SSO">Single Sign-On</li>
+                                <li class="nlic-sku-item nlic-sku-MANAGED_DOMAINS">Managed Domains</li>
+                                <li class="nlic-sku-item nlic-sku-ADMIN_CONTROLS">Admin Dashboard</li>
+                                <li class="nlic-sku-item nlic-sku-PHONE_UNLIMITED">Unlimited US/CA Calling</li>
+                                <li class="nlic-sku-item nlic-sku-DEDICATED_CSM">Dedicated CSM</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT_PRO"
+                 data-plan="LT_PRO"
+                 data-plan-name="Pro">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Pro
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="12.4"
+                             data-currency="EUR"
+                             data-period="month">
+                                <span class="nlic-plan-price-amount">12.4</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-quota nlic-sku-PARTICIPANTS">
+                                    <div class="nlic-sku-description">
+                                        Max Meeting Participants
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="100">
+                                                100
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-MEETING_DURATION">
+                                    <div class="nlic-sku-description">
+                                        Meeting Duration (min)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-CLOUD_STORAGE">
+                                    <div class="nlic-sku-description">
+                                        Cloud Storage (GB)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="5">
+                                                5
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-AI_COMPANION nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        AI Companion
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Single Sign-On
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-MANAGED_DOMAINS nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Managed Domains
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ADMIN_CONTROLS nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Admin Dashboard
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PHONE_UNLIMITED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Unlimited US/CA Calling
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-DEDICATED_CSM nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated CSM
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT_PRO nlic-action-disabled">
+                            <a href=""
+                               class="nlic-action-url nlic-action-url-disabled"
+                               aria-disabled="true"></a>
+                        </div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT_BUSINESS"
+                 data-plan="LT_BUSINESS"
+                 data-plan-name="Business">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Business
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="17.05"
+                             data-currency="EUR"
+                             data-period="month">
+                                <span class="nlic-plan-price-amount">17.05</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-quota nlic-sku-PARTICIPANTS">
+                                    <div class="nlic-sku-description">
+                                        Max Meeting Participants
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="300">
+                                                300
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-MEETING_DURATION">
+                                    <div class="nlic-sku-description">
+                                        Meeting Duration (min)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-CLOUD_STORAGE">
+                                    <div class="nlic-sku-description">
+                                        Cloud Storage (GB)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-AI_COMPANION nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        AI Companion
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Single Sign-On
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-MANAGED_DOMAINS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Managed Domains
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ADMIN_CONTROLS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Admin Dashboard
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PHONE_UNLIMITED nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Unlimited US/CA Calling
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-DEDICATED_CSM nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated CSM
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT_BUSINESS nlic-action-disabled">
+                            <a href=""
+                               class="nlic-action-url nlic-action-url-disabled"
+                               aria-disabled="true"></a>
+                        </div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT_BUSINESS_PLUS"
+                 data-plan="LT_BUSINESS_PLUS"
+                 data-plan-name="Business Plus">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Business Plus
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="20.92"
+                             data-currency="EUR"
+                             data-period="month">
+                                <span class="nlic-plan-price-amount">20.92</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-quota nlic-sku-PARTICIPANTS">
+                                    <div class="nlic-sku-description">
+                                        Max Meeting Participants
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="300">
+                                                300
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-MEETING_DURATION">
+                                    <div class="nlic-sku-description">
+                                        Meeting Duration (min)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-CLOUD_STORAGE">
+                                    <div class="nlic-sku-description">
+                                        Cloud Storage (GB)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-AI_COMPANION nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        AI Companion
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Single Sign-On
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-MANAGED_DOMAINS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Managed Domains
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ADMIN_CONTROLS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Admin Dashboard
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PHONE_UNLIMITED nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Unlimited US/CA Calling
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-DEDICATED_CSM nlic-sku-feature-disabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated CSM
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT_BUSINESS_PLUS nlic-action-disabled">
+                            <a href=""
+                               class="nlic-action-url nlic-action-url-disabled"
+                               aria-disabled="true"></a>
+                        </div>
+                </div>
+            </div>
+            <div class="nlic-column nlic-plan-column nlic-column-LT_ENTERPRISE"
+                 data-plan="LT_ENTERPRISE"
+                 data-plan-name="Enterprise">
+                <div class="nlic-plan-column">
+                    <div class="nlic-column-head">
+                        <div class="nlic-plan-name">
+                            Enterprise
+                        </div>
+                        <div class="nlic-plan-description">
+                            
+                        </div>
+                        <div class="nlic-plan-price"
+                             data-price="0.0"
+                             data-currency="EUR"
+                             data-period="month">
+                                <span class="nlic-plan-price-amount">0.0</span>
+                                    <span class="nlic-plan-price-currency">EUR</span>
+                                    <span class="nlic-plan-price-period-separator">/</span>
+                                    <span class="nlic-plan-price-period">month</span>
+                        </div>
+                    </div>
+                    <ul class="nlic-sku-list">
+                                <li class="nlic-sku-quota nlic-sku-PARTICIPANTS">
+                                    <div class="nlic-sku-description">
+                                        Max Meeting Participants
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="1000">
+                                                1000
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-MEETING_DURATION">
+                                    <div class="nlic-sku-description">
+                                        Meeting Duration (min)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-quota nlic-sku-CLOUD_STORAGE">
+                                    <div class="nlic-sku-description">
+                                        Cloud Storage (GB)
+                                    </div>
+                                            <div class="nlic-sku-quota-item"
+                                                 data-value="-1">
+                                                -1
+                                            </div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-AI_COMPANION nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        AI Companion
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-SSO nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Single Sign-On
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-MANAGED_DOMAINS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Managed Domains
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-ADMIN_CONTROLS nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Admin Dashboard
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-PHONE_UNLIMITED nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Unlimited US/CA Calling
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                                <li class="nlic-sku-feature nlic-sku-DEDICATED_CSM nlic-sku-feature-enabled">
+                                    <div class="nlic-sku-description">
+                                        Dedicated CSM
+                                    </div>
+                                            <div class="nlic-sku-feature-item"></div>
+                                </li>
+                    </ul>
+                        <div class="nlic-action nlic-action-LT_ENTERPRISE nlic-action-disabled">
+                            <a href=""
+                               class="nlic-action-url nlic-action-url-disabled"
+                               aria-disabled="true"></a>
+                        </div>
+                </div>
+            </div>
+        <div class="nlic-attribution">
+            Powered by <a href="https://netlicensing.io" rel="nofollow">Labs64 NetLicensing</a>
+        </div>
+</div>
+
+<!-- END:PricingTable -->
+</div>
+
+</body>
+</html>
